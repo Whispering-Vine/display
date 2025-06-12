@@ -35,40 +35,39 @@
   <div id="slideshow"></div>
   <script>
     const imageFolder = 'images/';
-    const imageFiles = [
-      '1-10.jpg',
-      '2-15.jpg',
-      '3-5.jpg'
-    ];
-
     const slideshow = document.getElementById('slideshow');
     let slides = [];
     let current = 0;
 
-    imageFiles.forEach(file => {
-      const slide = document.createElement('div');
-      slide.classList.add('slide');
-      slide.style.backgroundImage = `url(${imageFolder + file})`;
+    // Fetch the auto-generated index.json
+    fetch(`${imageFolder}index.json`)
+      .then(res => res.json())
+      .then(files => {
+        files.forEach(file => {
+          // create the slide element
+          const slide = document.createElement('div');
+          slide.classList.add('slide');
+          slide.style.backgroundImage = `url(${imageFolder + file})`;
 
-      const duration = parseInt(file.split('-')[1]) * 1000 || 10000;
-      slides.push({ element: slide, duration });
+          // duration = number after dash × 1000, default 10s
+          const duration = (parseInt(file.split('-')[1], 10) || 10) * 1000;
+          slides.push({ element: slide, duration });
 
-      slideshow.appendChild(slide);
-    });
+          slideshow.appendChild(slide);
+        });
 
-    function showSlide(index) {
+        if (slides.length) showSlide(0);
+      })
+      .catch(err => console.error('Could not load images/index.json:', err));
+
+    function showSlide(idx) {
       slides.forEach((s, i) => {
-        s.element.classList.toggle('active', i === index);
+        s.element.classList.toggle('active', i === idx);
       });
-
       setTimeout(() => {
         current = (current + 1) % slides.length;
         showSlide(current);
-      }, slides[index].duration);
-    }
-
-    if (slides.length > 0) {
-      showSlide(0);
+      }, slides[idx].duration);
     }
   </script>
 </body>
