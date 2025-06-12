@@ -1,0 +1,51 @@
+name: Update Image Index
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'images/**'
+  workflow_dispatch:
+
+
+jobs:
+  generate-index:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Generate index.json
+        run: |
+          node <<'EOF'
+          const fs = require('fs');
+          const path = require('path');
+
+          const dir = path.join(__dirname, 'images');
+          const files = fs.readdirSync(dir)
+            .filter(f => /^(\d+)-\d+\.(jpe?g|png|webp|gif)$/i.test(f))
+            .sort((a, b) => {
+              const aNum = parseInt(a.split('-')[0]);
+              const bNum = parseInt(b.split('-')[0]);
+              return aNum - bNum;
+            });
+
+          fs.writeFileSync(
+            path.join(dir, 'index.json'),
+            JSON.stringify(files, null, 2)
+          );
+          EOF
+
+      - name: Commit and Push Changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add images/index.json
+          git commit -m "Update images/index.json"
+          git push
+        continue-on-error: true
