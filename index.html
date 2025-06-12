@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Slideshow</title>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
+      background: black;
+    }
+    #slideshow {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+    }
+    .slide {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background-size: cover;
+      background-position: center;
+      opacity: 0;
+      transition: opacity 1s ease;
+    }
+    .slide.active {
+      opacity: 1;
+      z-index: 1;
+    }
+  </style>
+</head>
+<body>
+  <div id="slideshow"></div>
+  <script>
+    const imageFolder = 'images/';
+    const imageFiles = [
+      '1-10.jpg',
+      '2-15.jpg',
+      '3-5.jpg'
+    ];
+
+    const slideshow = document.getElementById('slideshow');
+    let slides = [];
+    let current = 0;
+
+    imageFiles.forEach(file => {
+      const slide = document.createElement('div');
+      slide.classList.add('slide');
+      slide.style.backgroundImage = `url(${imageFolder + file})`;
+
+      const duration = parseInt(file.split('-')[1]) * 1000 || 10000;
+      slides.push({ element: slide, duration });
+
+      slideshow.appendChild(slide);
+    });
+
+    function showSlide(index) {
+      slides.forEach((s, i) => {
+        s.element.classList.toggle('active', i === index);
+      });
+
+      setTimeout(() => {
+        current = (current + 1) % slides.length;
+        showSlide(current);
+      }, slides[index].duration);
+    }
+
+    if (slides.length > 0) {
+      showSlide(0);
+    }
+  </script>
+</body>
+</html>
